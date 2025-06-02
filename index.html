@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hey Lesly 💌</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #ffdee9, #b5fffc);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      color: #d63384;
+      animation: fadeIn 2s ease-in-out;
+      max-width: 90%;
+    }
+
+    .btn {
+      padding: 15px 40px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .yes {
+      background-color: #28a745;
+      color: white;
+      margin-top: 30px;
+    }
+
+    .no {
+      background-color: #dc3545;
+      color: white;
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .message {
+      margin-top: 40px;
+      font-size: 1.8em;
+      color: #20c997;
+      animation: fadeIn 1s ease-in-out;
+      display: none;
+      z-index: 2;
+    }
+
+    .response-status {
+      margin-top: 20px;
+      font-size: 1.1em;
+      color: #6c757d;
+      z-index: 2;
+    }
+
+    .hearts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .heart {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: url('https://twemoji.maxcdn.com/v/latest/72x72/2764.png') no-repeat center/contain;
+      animation: floatUp 4s ease-in infinite;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-800px) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Hey Lesly! 💕<br>Will you go out on a date with me this Saturday or Sunday?</h1>
+
+  <button class="btn yes" id="yesBtn">Yes 🥰</button>
+  <button class="btn no" id="noBtn">I can't 😔</button>
+
+  <div class="message" id="message">YAY!!! 💖 I can't wait to see you!</div>
+  <div class="response-status" id="responseStatus"></div>
+  <div class="hearts" id="heartsContainer"></div>
+
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.emailjs.com/sdk/2.3.2/email.min.js"></script>
+  <script type="text/javascript">
+    // Initialize EmailJS with your User ID
+    (function(){
+      emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS user ID
+    })();
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const noBtn = document.getElementById('noBtn');
+      const yesBtn = document.getElementById('yesBtn');
+      const message = document.getElementById('message');
+      const heartsContainer = document.getElementById('heartsContainer');
+      const responseStatus = document.getElementById('responseStatus');
+
+      // Function to move a button to a random position
+      function moveButtonRandomly(btn) {
+        const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+        const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+        btn.style.left = x + 'px';
+        btn.style.top = y + 'px';
+      }
+
+      noBtn.addEventListener('mouseover', () => moveButtonRandomly(noBtn));
+      noBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        moveButtonRandomly(noBtn);
+      });
+
+      yesBtn.addEventListener('click', () => {
+        // Hide the buttons and show the message
+        yesBtn.style.display = 'none';
+        noBtn.style.display = 'none';
+        message.style.display = 'block';
+        // Save the answer in localStorage to persist state across reloads
+        localStorage.setItem('leslyAnswer', 'yes');
+        spawnHearts();
+
+        // Send an email using EmailJS
+        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+          to_email: "maximus942479@icloud.com",
+          subject: "Lesly Accepted Your Invite!",
+          message: "Lesly said YES to your invitation. Congratulations!"
+        })
+        .then(function(response) {
+          console.log("Email sent successfully!", response.status, response.text);
+        }, function(error) {
+          console.error("Failed to send email:", error);
+        });
+      });
+
+      // Function to spawn animated hearts
+      function spawnHearts() {
+        for (let i = 0; i < 30; i++) {
+          const heart = document.createElement('div');
+          heart.classList.add('heart');
+          heart.style.left = Math.random() * 100 + 'vw';
+          heart.style.top = '100%';
+          heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          heartsContainer.appendChild(heart);
+          setTimeout(() => heart.remove(), 4000);
+        }
+      }
+
+      // If an answer is already stored, immediately show the message and hearts
+      const savedAnswer = localStorage.getItem('leslyAnswer');
+      if (savedAnswer === 'yes') {
+        responseStatus.innerText = "✅ Lesly already said YES! 💘";
+        yesBtn.style.display = 'none';
+        noBtn.style.display = 'none';
+        message.style.display = 'block';
+        spawnHearts();
+      }
+    });
+  </script>
+</body>
+</html>
+
+
